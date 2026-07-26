@@ -7,6 +7,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.TimeoutError;
 import com.microsoft.playwright.options.WaitUntilState;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import org.slf4j.Logger;
@@ -57,7 +58,11 @@ public class IsslLoginService {
         Playwright playwright = Playwright.create();
         Browser browser = null;
         try {
-            browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
+            // 배포 컨테이너는 root로 실행돼 기본 샌드박스로 Chromium이 못 뜬다(--no-sandbox 필요).
+            // --disable-dev-shm-usage: 컨테이너 기본 /dev/shm 용량 제한(보통 64MB)으로 인한 크래시 방지.
+            browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+                .setHeadless(true)
+                .setArgs(List.of("--no-sandbox", "--disable-dev-shm-usage")));
             BrowserContext context = browser.newContext(new Browser.NewContextOptions().setUserAgent(userAgent));
             Page page = context.newPage();
             // navigate/click 자체의 안전망 타임아웃 — 판정은 아래 폴링 루프가 별도로 처리한다.

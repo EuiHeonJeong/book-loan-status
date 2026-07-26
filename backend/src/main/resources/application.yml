@@ -1,4 +1,6 @@
 server:
+  # Railway 등 PaaS는 컨테이너가 PORT 환경변수로 지정된 포트를 리슨하길 기대한다.
+  port: ${PORT:8080}
   error:
     # 기본값(never)이면 ResponseStatusException의 reason(예: 도서관 로그인 실패 사유)이 응답 body에서
     # 빠져서 프론트가 일반 문구만 보게 된다 — 우리가 직접 작성한 사용자용 메시지라 노출해도 안전하다.
