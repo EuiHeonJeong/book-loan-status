@@ -1,0 +1,60 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.1.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.woori'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+	implementation 'com.microsoft.playwright:playwright:1.49.0'
+	// web-push의 POM엔 아래 셋이 runtime/optional로만 선언돼 있어 Gradle이 자동으로 안 끌어온다 —
+	// PushService.send()가 실제로 쓰는 타입(HttpResponse/BouncyCastle)이라 컴파일 classpath에 직접 추가.
+	implementation 'nl.martijndwars:web-push:5.1.2'
+	implementation 'org.apache.httpcomponents:httpasyncclient:4.1.5'
+	implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+	implementation 'org.bitbucket.b_c:jose4j:0.7.9'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testCompileOnly 'org.projectlombok:lombok'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// issl.go.kr 크롤링(IsslLoginService 등)에 필요한 Playwright 브라우저 바이너리 설치 — 최초 1회 실행 필요.
+tasks.register('installPlaywrightBrowsers', JavaExec) {
+	group = 'setup'
+	description = 'Installs the Chromium browser Playwright needs for issl.go.kr crawling.'
+	classpath = sourceSets.main.runtimeClasspath
+	mainClass = 'com.microsoft.playwright.CLI'
+	args = ['install', 'chromium']
+}

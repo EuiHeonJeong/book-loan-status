@@ -1,0 +1,157 @@
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+@import './tokens/effects.css';
+
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:var(--color-bg-page);
+  color:var(--color-text);
+}
+a{color:var(--color-link);text-decoration:none}
+a:hover{color:var(--color-link-hover);text-decoration:underline}
+
+.scrollbar-hidden{scrollbar-width:none;-ms-overflow-style:none}
+.scrollbar-hidden::-webkit-scrollbar{display:none}
+button{font-family:inherit}
+
+.app-shell{
+  min-height:100%;
+  display:flex;
+  justify-content:center;
+  padding:24px;
+}
+@media (max-width:520px){
+  .app-shell{padding:0}
+}
+
+.phone{
+  width:100%;
+  max-width:420px;
+  height:100vh;
+  background:var(--color-bg-surface);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-md);
+  border:1px solid var(--color-border);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+@media (max-width:520px){
+  .phone{border-radius:0;height:100dvh;box-shadow:none;border:none}
+}
+
+.appbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 20px;
+  border-bottom:1px solid var(--color-border);
+  background:var(--color-bg-surface);
+  flex-shrink:0;
+}
+.appbar-title{
+  font-family:var(--font-body);
+  font-weight:var(--font-weight-black);
+  font-size:var(--font-size-lg);
+  color:var(--color-neutral-900);
+}
+
+.icon-btn{
+  width:36px;
+  height:36px;
+  border-radius:var(--radius-circle);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:var(--color-neutral-800);
+  background:none;
+  border:none;
+  position:relative;
+}
+.icon-btn.sm{width:28px;height:28px;background:var(--color-neutral-100)}
+
+.chk{
+  width:18px;height:18px;border-radius:4px;
+  border:2px solid var(--color-neutral-400);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;cursor:pointer;
+}
+.chk.on{background:var(--color-primary-700);border-color:var(--color-primary-700);color:#fff;font-size:12px}
+
+.pill-btn{
+  padding:6px 14px;
+  border-radius:var(--radius-pill);
+  font-size:var(--font-size-xs);
+  cursor:pointer;
+  font-weight:var(--font-weight-medium);
+  border:none;
+  background:var(--color-neutral-100);
+  color:var(--color-neutral-800);
+}
+.pill-btn.selected{
+  background:var(--color-primary-700);
+  color:#fff;
+}
+
+.input-field{
+  height:44px;
+  border-radius:var(--radius-md);
+  border:1px solid transparent;
+  display:flex;
+  align-items:center;
+  padding:0 0 0 0;
+  font-size:var(--font-size-sm);
+  color:var(--color-text);
+  background:transparent;
+  gap:6px;
+}
+.input-field.editing{
+  border-color:var(--color-primary-700);
+  background:var(--color-bg-surface);
+  padding:0 14px;
+  box-shadow:0 0 0 3px var(--color-primary-50);
+}
+.input-field input{
+  border:none;background:transparent;outline:none;flex:1;
+  font-size:var(--font-size-sm);font-family:var(--font-body);color:var(--color-text);
+}
+.input-field .field-label{color:var(--color-neutral-600);flex-shrink:0}
+
+.badge{
+  font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0;
+}
+.badge.due{
+  border:1.5px solid var(--color-primary-700);
+  color:var(--color-primary-700);
+}
+.badge.overdue{
+  background:var(--color-accent-red);
+  color:#fff;
+}
+
+.overlay{
+  position:absolute;inset:0;background:rgba(31,31,36,.25);z-index:5;
+}
+.dropdown{
+  position:absolute;
+  background:var(--color-bg-surface);
+  border:1px solid var(--color-border);
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow-md);
+  overflow:hidden;
+  z-index:6;
+}
+
+.empty-state{
+  text-align:center;padding:32px 20px;font-size:var(--font-size-xs);color:var(--color-neutral-600);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.empty-state-icon{font-size:40px;line-height:1;filter:saturate(.55) sepia(.15) hue-rotate(-10deg);}
+
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}

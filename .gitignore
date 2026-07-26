@@ -1,0 +1,30 @@
+# env / secrets
+.env
+.env.*
+!.env.example
+.local/
+
+# frontend
+frontend/node_modules
+frontend/dist
+frontend/*.log
+
+# backend (Java/Gradle/Maven)
+backend/target
+backend/build
+backend/.gradle
+backend/out
+backend/HELP.md
+
+# IDE
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code session state
+.claude/
