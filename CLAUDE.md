@@ -25,3 +25,6 @@ Claude Design 프로젝트 "Library Loan Status"에서 핸드오프. 디자인 �
 - 도서관 계정 비밀번호는 반드시 AES-256-GCM으로 암호화 후 저장. 평문 저장/로그 금지.
 - `.env`, 암호화 키, 실제 가족 계정 자격증명은 절대 커밋하지 않는다.
 - issl.go.kr 자동 로그인 시 User-Agent를 실제 브라우저 값으로 설정할 것 (UA 기반 차단 있음, [docs/issl-site-notes.md](docs/issl-site-notes.md) 참고).
+
+## DB 마이그레이션 규칙
+- 테이블/컬럼을 새로 만들거나 이름·의미를 바꾸는 마이그레이션에는 반드시 `COMMENT ON TABLE` / `COMMENT ON COLUMN`을 같이 작성한다(예: `V4__add_comments.sql`). 무엇을 저장하는 컬럼인지, 다른 테이블과의 관계·제약(UNIQUE 이유 등)을 한국어로 짧게 남길 것.

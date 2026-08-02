@@ -57,7 +57,9 @@ frontend/
 
 ## 4. DB 스키마 (DDL)
 
-실제 마이그레이션: `backend/src/main/resources/db/migration/V1__init.sql`(초기 스키마), `V2__push_subscription.sql`(Web Push 구독), `V3__drop_overdue_alert_enabled.sql`(연체 알림 on/off를 별도 컬럼 대신 구독 존재 여부로 대체). 최초 스펙 초안에는 없었지만, OAuth2 로그인 계정을 실제로 연결하려면 `owner_user_id`가 참조할 사용자 테이블이 필요해서 `app_user`를 추가했다.
+실제 마이그레이션: `backend/src/main/resources/db/migration/V1__init.sql`(초기 스키마), `V2__push_subscription.sql`(Web Push 구독), `V3__drop_overdue_alert_enabled.sql`(연체 알림 on/off를 별도 컬럼 대신 구독 존재 여부로 대체), `V4__add_comments.sql`(전 테이블/컬럼에 COMMENT 추가 — 새 테이블/컬럼은 항상 COMMENT를 같이 작성한다), `V5__move_tables_to_app_schema.sql`·`V6__move_flyway_history_to_app_schema.sql`(모든 테이블을 `public`에서 `app` 스키마로 이전). 최초 스펙 초안에는 없었지만, OAuth2 로그인 계정을 실제로 연결하려면 `owner_user_id`가 참조할 사용자 테이블이 필요해서 `app_user`를 추가했다.
+
+**스키마**: 전 테이블이 `public`이 아니라 `app` 스키마에 있다. DB 접속 유저가 `app`이고 Postgres 기본 `search_path`가 `"$user", public`이라, 스키마명을 유저명과 동일하게 두면 애플리케이션(Hibernate/Flyway) 쪽에 별도 스키마 설정 없이 자동으로 `app` 스키마가 우선 적용된다.
 
 ```sql
 CREATE TABLE app_user (
