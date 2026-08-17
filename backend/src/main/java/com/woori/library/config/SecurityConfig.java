@@ -30,6 +30,15 @@ public class SecurityConfig {
     @Value("${app.frontend.base-url:http://localhost:5173}")
     private String frontendBaseUrl;
 
+    // 세션 쿠키와 동일한 값을 써야 한다 — CSRF 쿠키(XSRF-TOKEN)만 SameSite=None이 아니면
+    // 크로스 도메인 배포(Vercel ↔ my-library.org)에서 프론트가 이 쿠키를 되돌려보내지 못해
+    // POST/PUT/DELETE 요청이 전부 403(Invalid CSRF token)으로 거부된다.
+    @Value("${server.servlet.session.cookie.same-site:lax}")
+    private String cookieSameSite;
+
+    @Value("${server.servlet.session.cookie.secure:false}")
+    private boolean cookieSecure;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -42,7 +51,7 @@ public class SecurityConfig {
             // 마스킹하는데, 이러면 JS가 쿠키 값을 그대로 읽어 헤더로 되돌려보내는 방식과 안 맞아
             // "Invalid CSRF token"으로 매번 거부된다 — 마스킹 없는 단순 핸들러로 명시적으로 바꾼다.
             .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRepository(cookieCsrfTokenRepository())
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
             .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
@@ -70,6 +79,12 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private CookieCsrfTokenRepository cookieCsrfTokenRepository() {
+        CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        repository.setCookieCustomizer(cookie -> cookie.sameSite(cookieSameSite).secure(cookieSecure));
+        return repository;
     }
 
     /** CsrfToken의 지연 로딩을 강제로 해제해 XSRF-TOKEN 쿠키가 실제로 응답에 실리게 한다. */
