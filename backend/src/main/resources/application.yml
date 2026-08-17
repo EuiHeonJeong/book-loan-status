@@ -5,6 +5,15 @@ server:
   # 이걸 신뢰하지 않으면 OAuth2 redirect-uri의 {baseUrl}이 내부 주소(http://backend:8080)로
   # 잘못 만들어져서 구글/네이버 콘솔에 등록한 https 주소와 안 맞아 로그인이 계속 실패한다.
   forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        # 프론트(Vercel)와 백엔드(my-library.org)가 서로 다른 도메인이라, 기본값인 Lax 쿠키는
+        # 프론트의 axios 요청에 세션 쿠키를 안 실어보내 로그인 직후 API가 전부 미인증으로 처리된다.
+        # SameSite=None은 Secure(HTTPS)가 필수라 로컬 개발(http://localhost)에서는 그대로 두면 쿠키가
+        # 아예 저장되지 않으므로, 배포 환경에서만 env var로 켠다.
+        same-site: ${SESSION_COOKIE_SAME_SITE:lax}
+        secure: ${SESSION_COOKIE_SECURE:false}
   error:
     # 기본값(never)이면 ResponseStatusException의 reason(예: 도서관 로그인 실패 사유)이 응답 body에서
     # 빠져서 프론트가 일반 문구만 보게 된다 — 우리가 직접 작성한 사용자용 메시지라 노출해도 안전하다.
