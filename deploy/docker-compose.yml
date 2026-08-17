@@ -25,24 +25,18 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    # caddy가 내부 DNS(backend:8080)로 접근하므로 호스트 포트 노출 불필요.
+    # cloudflared가 내부 DNS(backend:8080)로 접근하므로 호스트 포트 노출 불필요.
 
-  caddy:
-    image: caddy:2
+  cloudflared:
+    image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+    command: tunnel run
     environment:
-      DOMAIN: ${DOMAIN}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
     depends_on:
       - backend
+    # 아웃바운드로만 Cloudflare에 연결하므로 80/443 포트를 호스트에 열 필요가 없다.
+    # Public Hostname → Service 매핑은 Cloudflare 대시보드에서 backend:8080으로 설정한다.
 
 volumes:
   postgres_data:
-  caddy_data:
-  caddy_config:
