@@ -22,39 +22,20 @@ button{font-family:inherit}
   min-height:100%;
   display:flex;
   justify-content:center;
-  padding:24px;
-}
-@media (max-width:520px){
-  .app-shell{padding:0}
 }
 
+/* 화면 크기와 무관하게 항상 뷰포트를 꽉 채운다 — "가운데 뜬 폰 카드" 스타일(여백/그림자/테두리)은
+   쓰지 않는다. 좁은 화면과 넓은 화면(폴드 펼침, 태블릿, 데스크톱)이 전부 동일한 방식이어야
+   화면 키웠을 때 갑자기 여백이 생기는 문제가 안 생긴다. */
 .phone{
   width:100%;
-  max-width:420px;
   height:100vh;
   height:100dvh; /* 모바일 브라우저 주소창 높이 변화에 맞춰 실제 보이는 영역 기준으로 잡음(dvh 미지원 브라우저는 위 100vh로 대체) */
   background:var(--color-bg-surface);
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-md);
-  border:1px solid var(--color-border);
   overflow:hidden;
   display:flex;
   flex-direction:column;
   position:relative;
-}
-@media (max-width:520px){
-  .phone{border-radius:0;box-shadow:none;border:none}
-}
-/* 가로모드(휴대폰을 눕힌 상태) — 세로 공간이 좁아지므로 420px 폭 제한을 풀어 내용이
-   눌리지 않게 하고, 좁은 화면과 동일하게 카드 테두리를 없애 화면을 꽉 채운다. */
-@media (orientation:landscape) and (max-height:520px){
-  .app-shell{padding:0}
-  .phone{max-width:100%;border-radius:0;box-shadow:none;border:none}
-}
-/* 갤럭시 폴드 펼친 화면, 태블릿처럼 넓은 화면 — 420px 폭 제한을 풀어 카드 하나가 넓게
-   늘어나 흉해지는 대신, .loan-list가 여러 열 그리드로 전환되도록 폭을 넉넉히 준다. */
-@media (min-width:700px){
-  .phone{max-width:min(900px,92vw)}
 }
 
 .appbar{
