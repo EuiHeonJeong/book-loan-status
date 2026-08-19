@@ -32,6 +32,7 @@ button{font-family:inherit}
   width:100%;
   max-width:420px;
   height:100vh;
+  height:100dvh; /* 모바일 브라우저 주소창 높이 변화에 맞춰 실제 보이는 영역 기준으로 잡음(dvh 미지원 브라우저는 위 100vh로 대체) */
   background:var(--color-bg-surface);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow-md);
@@ -42,7 +43,13 @@ button{font-family:inherit}
   position:relative;
 }
 @media (max-width:520px){
-  .phone{border-radius:0;height:100dvh;box-shadow:none;border:none}
+  .phone{border-radius:0;box-shadow:none;border:none}
+}
+/* 가로모드(휴대폰을 눕힌 상태) — 세로 공간이 좁아지므로 420px 폭 제한을 풀어 내용이
+   눌리지 않게 하고, 좁은 화면과 동일하게 카드 테두리를 없애 화면을 꽉 채운다. */
+@media (orientation:landscape) and (max-height:520px){
+  .app-shell{padding:0}
+  .phone{max-width:100%;border-radius:0;box-shadow:none;border:none}
 }
 
 .appbar{

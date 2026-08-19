@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -30,6 +31,15 @@ public class SecurityConfig {
             // corsConfigurationSource) 자격 증명(쿠키) 필수로 묶어서, 다른 사이트發 요청은 브라우저의
             // CORS 정책 자체가 막아준다 — 이 조합으로 CSRF를 대체한다.
             .csrf(csrf -> csrf.disable())
+            // oauth2Login()을 쓰면 Spring Security 기본 진입점이 미인증 요청을 전부 구글/네이버
+            // 로그인 화면으로 302 리다이렉트시킨다 — 사람이 직접 접속했을 땐 맞는 동작이지만, 프론트가
+            // axios로 부르는 API 요청 입장에선 이 리다이렉트 응답이 CORS에 걸려 그냥 네트워크 에러로만
+            // 보인다(응답 상태 코드 자체를 못 읽음). 그래서 프론트의 401 감지 후 로그인 페이지 이동
+            // 로직이 못 걸리고, 화면이 빈 채로 남거나 목록이 0건으로 표시되는 문제로 이어졌다.
+            // API는 리다이렉트 대신 순수 401만 내려주도록 진입점을 바꾼다.
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)))
             .authorizeHttpRequests(auth -> auth
                 // CORS preflight(OPTIONS)는 자격 증명(쿠키) 없이 오므로, 인증을 요구하면 브라우저가
                 // "preflight에 리다이렉트는 허용되지 않는다"며 실제 요청 자체를 막아버린다.
