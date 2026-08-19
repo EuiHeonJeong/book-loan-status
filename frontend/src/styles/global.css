@@ -51,6 +51,11 @@ button{font-family:inherit}
   .app-shell{padding:0}
   .phone{max-width:100%;border-radius:0;box-shadow:none;border:none}
 }
+/* 갤럭시 폴드 펼친 화면, 태블릿처럼 넓은 화면 — 420px 폭 제한을 풀어 카드 하나가 넓게
+   늘어나 흉해지는 대신, .loan-list가 여러 열 그리드로 전환되도록 폭을 넉넉히 준다. */
+@media (min-width:700px){
+  .phone{max-width:min(900px,92vw)}
+}
 
 .appbar{
   display:flex;
@@ -153,6 +158,22 @@ button{font-family:inherit}
   box-shadow:var(--shadow-md);
   overflow:hidden;
   z-index:6;
+}
+
+.loan-list{
+  padding:14px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+@media (min-width:700px){
+  .loan-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:12px;
+    align-items:start;
+  }
+  .loan-list>.loan-list-full{grid-column:1/-1}
 }
 
 .empty-state{

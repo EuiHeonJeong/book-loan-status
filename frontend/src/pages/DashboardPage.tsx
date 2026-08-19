@@ -319,18 +319,22 @@ export function DashboardPage() {
           )}
         </div>
 
-        <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="loan-list">
           {filteredLoans.length > 0 && (
-            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-neutral-600)', fontWeight: 'var(--font-weight-medium)' }}>
+            <div className="loan-list-full" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-neutral-600)', fontWeight: 'var(--font-weight-medium)' }}>
               총 {filteredLoans.length}건
             </div>
           )}
           {filteredLoans.map((loan) => (
             <LoanCard key={loan.id} loan={loan} />
           ))}
-          {filteredLoans.length === 0 && <EmptyState message="대여 현황이 없습니다" />}
+          {filteredLoans.length === 0 && (
+            <div className="loan-list-full">
+              <EmptyState message="대여 현황이 없습니다" />
+            </div>
+          )}
           {lastSynced && (
-            <div style={{ fontSize: 11, color: 'var(--color-neutral-600)', textAlign: 'center', marginTop: 6, whiteSpace: 'nowrap' }}>
+            <div className="loan-list-full" style={{ fontSize: 11, color: 'var(--color-neutral-600)', textAlign: 'center', marginTop: 6, whiteSpace: 'nowrap' }}>
               최근 갱신 {lastSynced} · 실시간 정보와 다를 수 있어요
             </div>
           )}
