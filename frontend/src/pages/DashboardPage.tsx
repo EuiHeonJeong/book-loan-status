@@ -6,10 +6,17 @@ import { LoanCard, UrgentLoanCard } from '../components/LoanCard';
 import { EmptyState } from '../components/EmptyState';
 import { LIBRARY_CODES, type LibraryCode, type LoanRecord, type SortDir, type SortKey } from '../types';
 import { getLoans, syncLoans } from '../api/loans';
+import { getReservations } from '../api/reservations';
+import { getMutualLoans } from '../api/mutualLoans';
 import { listMembers } from '../api/members';
 import { logout } from '../api/auth';
 import { getNotificationSettings } from '../api/notificationSettings';
-import type { LoanResponse, NotificationSettingResponse } from '../api/types';
+import type { LoanResponse, MutualLoanResponse, NotificationSettingResponse, ReservationResponse } from '../api/types';
+
+type NotifItem =
+  | { kind: 'loan'; id: string; title: string; dday: number; dueDate: string; library: string; memberName: string }
+  | { kind: 'reservationReady'; id: string; title: string; memberName: string }
+  | { kind: 'mutualLoanReady'; id: string; title: string; memberName: string };
 
 const MIN_SYNC_INDICATOR_MS = 500;
 const DUE_TIMING_THRESHOLD: Record<NotificationSettingResponse['dueAlertTiming'], number> = {
@@ -49,6 +56,8 @@ export function DashboardPage() {
   const [syncing, setSyncing] = useState(false);
   const [lastSynced, setLastSynced] = useState<string | null>(null);
   const [loans, setLoans] = useState<LoanRecord[]>([]);
+  const [reservations, setReservations] = useState<ReservationResponse[]>([]);
+  const [mutualLoans, setMutualLoans] = useState<MutualLoanResponse[]>([]);
   const [notifSettings, setNotifSettings] = useState<NotificationSettingResponse>({
     dueAlertEnabled: true,
     dueAlertTiming: 'd3',
@@ -58,6 +67,8 @@ export function DashboardPage() {
   const syncingRef = useRef(false);
 
   const loadLoans = () => getLoans().then((data) => setLoans(data.map(toLoanRecord)));
+  const loadReservations = () => getReservations().then(setReservations);
+  const loadMutualLoans = () => getMutualLoans().then(setMutualLoans);
 
   useEffect(() => {
     listMembers().then((members) => {
@@ -66,6 +77,8 @@ export function DashboardPage() {
       setFamily(Object.fromEntries(names.map((n) => [n, true])));
     });
     loadLoans();
+    loadReservations();
+    loadMutualLoans();
     getNotificationSettings().then(setNotifSettings);
   }, []);
 
@@ -75,7 +88,7 @@ export function DashboardPage() {
     setSyncing(true);
     const startedAt = Date.now();
     syncLoans()
-      .then(() => loadLoans())
+      .then(() => Promise.all([loadLoans(), loadReservations(), loadMutualLoans()]))
       .then(() => {
         const now = new Date();
         const pad = (n: number) => String(n).padStart(2, '0');
@@ -114,7 +127,22 @@ export function DashboardPage() {
     () => (notifSettings.dueAlertEnabled ? loans.filter((l) => l.dday <= dueThreshold).slice(0, 3) : []),
     [loans, notifSettings.dueAlertEnabled, dueThreshold]
   );
-  const notifications = urgentLoans;
+  const readyReservations = useMemo(() => reservations.filter((r) => r.ready), [reservations]);
+  const readyMutualLoans = useMemo(() => mutualLoans.filter((m) => m.ready), [mutualLoans]);
+  const notifications: NotifItem[] = useMemo(
+    () => [
+      ...urgentLoans.map(
+        (l): NotifItem => ({ kind: 'loan', id: l.id, title: l.title, dday: l.dday, dueDate: l.dueDate, library: l.library, memberName: l.memberName })
+      ),
+      ...readyReservations.map(
+        (r, i): NotifItem => ({ kind: 'reservationReady', id: `resv-${i}-${r.title}`, title: r.title, memberName: r.memberName })
+      ),
+      ...readyMutualLoans.map(
+        (m, i): NotifItem => ({ kind: 'mutualLoanReady', id: `mutual-${i}-${m.title}`, title: m.title, memberName: m.memberName })
+      ),
+    ],
+    [urgentLoans, readyReservations, readyMutualLoans]
+  );
 
   const closeAllOverlays = () => {
     setMenuOpen(false);
@@ -345,13 +373,15 @@ export function DashboardPage() {
         <>
           <div className="overlay" onClick={closeAllOverlays} />
           <div className="dropdown" style={{ top: 60, right: 16, width: 200 }}>
-            {['가족 관리', '알림 설정', '로그아웃'].map((label) => (
+            {['가족 관리', '상호대차현황', '일반예약현황', '알림 설정', '로그아웃'].map((label) => (
               <div
                 key={label}
                 style={{ padding: '12px 16px', fontSize: 'var(--font-size-sm)', color: 'var(--color-text)', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}
                 onClick={() => {
                   closeAllOverlays();
-                  if (label === '가족 관리') navigate('/family');
+                  if (label === '일반예약현황') navigate('/reservations');
+                  else if (label === '상호대차현황') navigate('/mutual-loans');
+                  else if (label === '가족 관리') navigate('/family');
                   else if (label === '알림 설정') navigate('/notifications');
                   else logout().finally(() => navigate('/login'));
                 }}
@@ -372,15 +402,36 @@ export function DashboardPage() {
             </div>
             <div style={{ overflowY: 'auto' }}>
               {notifications.map((n) => {
-                const overdue = n.dday < 0;
+                if (n.kind === 'loan') {
+                  const overdue = n.dday < 0;
+                  return (
+                    <div key={n.id} style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                        <span style={{ fontSize: 'var(--font-size-xs)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text)' }}>{n.title}</span>
+                        <span className={overdue ? 'badge overdue' : 'badge due'}>{overdue ? `연체 D+${-n.dday}` : `D-${n.dday}`}</span>
+                      </div>
+                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-neutral-600)' }}>
+                        반납예정 {n.dueDate} · {n.library} · {n.memberName}
+                      </div>
+                    </div>
+                  );
+                }
+                const isReservation = n.kind === 'reservationReady';
                 return (
-                  <div key={n.id} style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div
+                    key={n.id}
+                    style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 4, cursor: 'pointer' }}
+                    onClick={() => {
+                      closeAllOverlays();
+                      navigate(isReservation ? '/reservations' : '/mutual-loans');
+                    }}
+                  >
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                       <span style={{ fontSize: 'var(--font-size-xs)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text)' }}>{n.title}</span>
-                      <span className={overdue ? 'badge overdue' : 'badge due'}>{overdue ? `연체 D+${-n.dday}` : `D-${n.dday}`}</span>
+                      <span className="badge ready">대출가능</span>
                     </div>
                     <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-neutral-600)' }}>
-                      반납예정 {n.dueDate} · {n.library} · {n.memberName}
+                      {isReservation ? '일반예약' : '상호대차'} · {n.memberName}
                     </div>
                   </div>
                 );

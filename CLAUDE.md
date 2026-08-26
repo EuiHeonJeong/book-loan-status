@@ -16,6 +16,8 @@
   - [02-dashboard.md](docs/screens/02-dashboard.md) — 현황조회(메인)
   - [03-family-members.md](docs/screens/03-family-members.md) — 가족등록
   - [04-notification-settings.md](docs/screens/04-notification-settings.md) — 알림설정
+  - [05-reservations.md](docs/screens/05-reservations.md) — 일반예약현황
+  - [06-mutual-loans.md](docs/screens/06-mutual-loans.md) — 상호대차현황(신청현황)
 - issl.go.kr 사이트 구조 조사 결과: [docs/issl-site-notes.md](docs/issl-site-notes.md)
 
 ## 디자인 소스

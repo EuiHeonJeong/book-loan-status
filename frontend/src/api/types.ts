@@ -34,6 +34,36 @@ export interface SyncResponse {
   failed: string[];
 }
 
+export interface ReservationResponse {
+  title: string;
+  branch: string;
+  reservedAt: string;
+  expiresAt: string | null;
+  rank: number | null;
+  statusText: string;
+  ready: boolean;
+  memberName: string;
+}
+
+export interface MutualLoanResponse {
+  title: string;
+  branch: string;
+  pickupBranch: string;
+  appliedAt: string;
+  statusText: string;
+  ready: boolean;
+  memberName: string;
+}
+
+export interface MutualLoanHistoryResponse {
+  title: string;
+  branch: string;
+  pickupBranch: string;
+  appliedAt: string;
+  statusText: string;
+  memberName: string;
+}
+
 export interface NotificationSettingResponse {
   dueAlertEnabled: boolean;
   dueAlertTiming: 'd3' | 'd2' | 'd1' | 'd0';

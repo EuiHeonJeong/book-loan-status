@@ -39,3 +39,36 @@ export interface NotificationSettings {
   dueAlertEnabled: boolean;
   dueAlertTiming: 'd3' | 'd2' | 'd1' | 'd0';
 }
+
+export interface ReservationItem {
+  id: string;
+  title: string;
+  branch: string;
+  reservedAt: string; // MM.DD
+  expiresAt: string | null; // MM.DD
+  rank: number | null;
+  statusText: string;
+  ready: boolean;
+  memberName: string;
+}
+
+export interface MutualLoanItem {
+  id: string;
+  title: string;
+  branch: string;
+  pickupBranch: string;
+  appliedAt: string; // MM.DD
+  statusText: string;
+  ready: boolean;
+  memberName: string;
+}
+
+export interface MutualLoanHistoryItem {
+  id: string;
+  title: string;
+  branch: string;
+  pickupBranch: string;
+  appliedAt: string; // MM.DD
+  statusText: string;
+  memberName: string;
+}

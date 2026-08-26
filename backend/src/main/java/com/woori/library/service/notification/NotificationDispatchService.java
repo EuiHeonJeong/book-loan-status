@@ -1,10 +1,16 @@
 package com.woori.library.service.notification;
 
 import com.woori.library.domain.LoanRecord;
+import com.woori.library.domain.MutualLoanRecord;
 import com.woori.library.domain.PushSubscription;
+import com.woori.library.domain.ReservationRecord;
 import com.woori.library.repository.LoanRecordRepository;
+import com.woori.library.repository.MutualLoanRecordRepository;
 import com.woori.library.repository.NotificationSettingRepository;
 import com.woori.library.repository.PushSubscriptionRepository;
+import com.woori.library.repository.ReservationRecordRepository;
+import com.woori.library.service.reservation.ReadyStatusMatcher;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -25,21 +31,29 @@ public class NotificationDispatchService {
 
     private final NotificationSettingRepository notificationSettingRepository;
     private final LoanRecordRepository loanRecordRepository;
+    private final ReservationRecordRepository reservationRecordRepository;
+    private final MutualLoanRecordRepository mutualLoanRecordRepository;
     private final PushSubscriptionRepository pushSubscriptionRepository;
     private final PushNotificationService pushNotificationService;
 
     public NotificationDispatchService(
         NotificationSettingRepository notificationSettingRepository,
         LoanRecordRepository loanRecordRepository,
+        ReservationRecordRepository reservationRecordRepository,
+        MutualLoanRecordRepository mutualLoanRecordRepository,
         PushSubscriptionRepository pushSubscriptionRepository,
         PushNotificationService pushNotificationService) {
         this.notificationSettingRepository = notificationSettingRepository;
         this.loanRecordRepository = loanRecordRepository;
+        this.reservationRecordRepository = reservationRecordRepository;
+        this.mutualLoanRecordRepository = mutualLoanRecordRepository;
         this.pushSubscriptionRepository = pushSubscriptionRepository;
         this.pushNotificationService = pushNotificationService;
     }
 
-    @Transactional(readOnly = true)
+    // 대출가능 알림은 ready_notified_at을 기록해야 해서 쓰기 트랜잭션이 필요하다(반납예정/연체는 매번
+    // 새로 계산하는 읽기 전용 로직이라 이전에는 readOnly=true였음).
+    @Transactional
     public void dispatchForOwner(Long ownerUserId) {
         List<PushSubscription> subscriptions = pushSubscriptionRepository.findByOwnerUserId(ownerUserId);
         if (subscriptions.isEmpty()) {
@@ -71,6 +85,42 @@ public class NotificationDispatchService {
             .toList();
         if (!overdue.isEmpty()) {
             sendToAll(subscriptions, "연체 도서 " + overdue.size() + "권", String.join(", ", overdue));
+        }
+
+        dispatchReservationReady(ownerUserId, subscriptions);
+        dispatchMutualLoanReady(ownerUserId, subscriptions);
+    }
+
+    /** 새로 "대출가능"으로 판정된(아직 알림 안 보낸) 예약 건만 골라 발송하고, 보낸 건은 즉시 표시해 중복 발송을 막는다. */
+    private void dispatchReservationReady(Long ownerUserId, List<PushSubscription> subscriptions) {
+        List<ReservationRecord> newlyReady = reservationRecordRepository.findAllForOwner(ownerUserId).stream()
+            .filter(r -> r.getReadyNotifiedAt() == null && ReadyStatusMatcher.isReservationReady(r.getStatusText()))
+            .toList();
+        if (newlyReady.isEmpty()) {
+            return;
+        }
+        List<String> titles = newlyReady.stream().map(ReservationRecord::getBookTitle).toList();
+        sendToAll(subscriptions, "예약 도서 대출가능 " + titles.size() + "권", String.join(", ", titles));
+        Instant now = Instant.now();
+        for (ReservationRecord r : newlyReady) {
+            r.setReadyNotifiedAt(now);
+            reservationRecordRepository.save(r);
+        }
+    }
+
+    private void dispatchMutualLoanReady(Long ownerUserId, List<PushSubscription> subscriptions) {
+        List<MutualLoanRecord> newlyReady = mutualLoanRecordRepository.findAllForOwner(ownerUserId).stream()
+            .filter(m -> m.getReadyNotifiedAt() == null && ReadyStatusMatcher.isMutualLoanReady(m.getStatusText()))
+            .toList();
+        if (newlyReady.isEmpty()) {
+            return;
+        }
+        List<String> titles = newlyReady.stream().map(MutualLoanRecord::getBookTitle).toList();
+        sendToAll(subscriptions, "상호대차 도서 대출가능 " + titles.size() + "권", String.join(", ", titles));
+        Instant now = Instant.now();
+        for (MutualLoanRecord m : newlyReady) {
+            m.setReadyNotifiedAt(now);
+            mutualLoanRecordRepository.save(m);
         }
     }
 

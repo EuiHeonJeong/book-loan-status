@@ -9,8 +9,8 @@
 - 정렬 기준: 반납예정일 / 대출일, 오름차순·내림차순 토글
 - 필터링된 대출 목록: 도서명, 대출일, 반납예정일, 지점명, 가족 구성원명, D-day 또는 연체 배지
 - 결과 없음 상태 문구 처리
-- 상단 알림(벨) 아이콘: 새 알림 있으면 red dot 표시, 클릭 시 알림 목록 드롭다운
-- 상단 메뉴(햄버거) 아이콘: 클릭 시 "가족 구성원 관리 / 알림 설정 / 로그아웃" 드롭다운
+- 상단 알림(벨) 아이콘: 새 알림 있으면 red dot 표시, 클릭 시 알림 목록 드롭다운 (반납임박/연체 + 일반예약·상호대차 "대출가능" 알림 포함, "대출가능" 배지는 보라색(primary) 채움 — 연체와 같은 빨간색이 아님. 클릭 시 해당 화면으로 이동)
+- 상단 메뉴(햄버거) 아이콘: 클릭 시 "가족 관리 / 상호대차현황 / 일반예약현황 / 알림 설정 / 로그아웃" 드롭다운(Claude Design 핸드오프 순서)
 
 ## 레이아웃 구성
 
@@ -46,8 +46,8 @@
   - `UrgentLoansRail` (가로 스크롤 카드 리스트)
   - `FilterSortPanel` (접기/펼치기, `FamilyCheckboxGroup`, `LibraryCheckboxGroup`, `SortPillGroup`, `SortDirToggle`)
   - `LoanList` → `LoanCard` (반복), `EmptyState`
-  - `MenuDropdown` (오버레이 + 메뉴 아이템)
-  - `NotifDropdown` (오버레이 + `NotifItem` 반복, `EmptyState`)
+  - `MenuDropdown` (오버레이 + 메뉴 아이템: 가족 관리/상호대차현황/일반예약현황/알림 설정/로그아웃)
+  - `NotifDropdown` (오버레이 + `NotifItem` 반복, `EmptyState`) — `NotifItem`은 반납임박/연체/예약 대출가능/상호대차 대출가능 4종을 아이콘·문구로 구분
 
 ## 상태/인터랙션
 - `filterOpen: boolean` — 필터 패널 접기/펼치기
