@@ -373,7 +373,7 @@ export function DashboardPage() {
         <>
           <div className="overlay" onClick={closeAllOverlays} />
           <div className="dropdown" style={{ top: 60, right: 16, width: 200 }}>
-            {['가족 관리', '상호대차현황', '일반예약현황', '알림 설정', '로그아웃'].map((label) => (
+            {['상호대차현황', '일반예약현황', '가족 관리', '알림 설정', '로그아웃'].map((label) => (
               <div
                 key={label}
                 style={{ padding: '12px 16px', fontSize: 'var(--font-size-sm)', color: 'var(--color-text)', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}
