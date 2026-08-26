@@ -4,7 +4,7 @@
 
 ## 기술 스택
 - Frontend: React + TypeScript + Vite
-- Backend: Spring Boot 3.x (Java 21) + PostgreSQL 16
+- Backend: Spring Boot 4.x (Java 21) + PostgreSQL 17
 - 크롤링/자동로그인: Playwright (Java 바인딩)
 - 서비스 로그인: OAuth2 (Google/Naver)
 - 비밀번호 암호화: AES-256-GCM (`.env`로 키 분리, 절대 커밋 금지)

@@ -21,13 +21,13 @@ woori-library/                      ← 모노레포 루트
 | Frontend | React 18 + TypeScript 5 + Vite 5 | 디자인 토큰은 화면별 문서 참고, CSS 변수로 이식 |
 | 상태관리 | React 내장 (useState/useReducer) | 화면 6개 규모라 Redux 등 불필요 |
 | 라우팅 | react-router-dom | 로그인/메인/가족등록/알림설정/일반예약현황/상호대차현황 6-route |
-| Backend | Spring Boot 3.x (Java 21) | Web, Validation, Data JPA, Security(OAuth2 Client) |
-| DB | PostgreSQL 17 | 로컬 개발은 관리자 권한이 필요 없는 portable 바이너리(zip)로 `.local/pgsql`에 설치 |
+| Backend | Spring Boot 4.x (Java 21) | Web, Validation, Data JPA, Security(OAuth2 Client). Jackson 3(`tools.jackson.*` 패키지 — `com.fasterxml.jackson` 아님, 새 서비스에서 Jackson 타입 임포트할 때 주의 |
+| DB | PostgreSQL 17 | 로컬 개발은 관리자 권한이 필요 없는 portable 바이너리(zip)로 `.local/pgsql`에 설치, 배포 환경은 Docker Compose의 `postgres:17` 이미지 |
 | 크롤링 | Playwright for Java | Chromium headless, 세션 쿠키 재사용 |
 | 인증(서비스) | OAuth2 (Google/Naver) | Spring Security OAuth2 Client |
 | 암호화 | AES-256-GCM | 도서관 계정 비밀번호 저장용 |
 | 푸시 알림 | Web Push (VAPID) + `nl.martijndwars:web-push` | 브라우저 구독을 `push_subscription`에 저장, 매일 스케줄러가 발송 |
-| 인프라 | 로컬: portable PostgreSQL / 배포: 별도 결정 필요 | Docker는 아직 미도입 |
+| 인프라 | 로컬: portable PostgreSQL / 배포: 집 PC VirtualBox Ubuntu VM + Docker Compose(백엔드+DB), Vercel(프론트) | Cloudflare Tunnel로 외부 노출(`my-library.org`) — 상세는 [DEPLOYMENT.md](../DEPLOYMENT.md) |
 
 ## 3. 프로젝트 구조
 
@@ -245,9 +245,12 @@ OAUTH_GOOGLE_CLIENT_ID=...
 OAUTH_GOOGLE_CLIENT_SECRET=...
 OAUTH_NAVER_CLIENT_ID=...
 OAUTH_NAVER_CLIENT_SECRET=...
-OAUTH_KAKAO_CLIENT_ID=...
-OAUTH_KAKAO_CLIENT_SECRET=...
+VAPID_PUBLIC_KEY=...
+VAPID_PRIVATE_KEY=...
+VAPID_SUBJECT=mailto:...
+APP_FRONTEND_BASE_URL=http://localhost:5173
 ```
+카카오는 한때 검토했으나 사용자 요청으로 코드베이스 전체(백엔드 설정/서비스, 프론트 버튼/아이콘, 이 문서 포함)에서 제거되었다 — 되살려달라는 요청이 없는 한 다시 추가하지 않는다.
 
 ## 9. 화면 ↔ API 매핑
 
